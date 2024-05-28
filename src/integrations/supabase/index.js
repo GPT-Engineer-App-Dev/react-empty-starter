@@ -50,10 +50,19 @@ Venue // table: venues
 
 // hooks
 
-export const useEvents = () => useQuery({
-    queryKey: ['events'],
-    queryFn: () => fromSupabase(supabase.from('events').select('*,comments(*)')),
-});
+export const useEvents = () => {
+    return useQuery({
+        queryKey: ['events'],
+        queryFn: async () => {
+            const events = await fromSupabase(supabase.from('events').select('*'));
+            const comments = await fromSupabase(supabase.from('comments').select('*'));
+            return events.map(event => ({
+                ...event,
+                comments: comments.filter(comment => comment.event_id === event.id)
+            }));
+        },
+    });
+};
 
 export const useAddEvent = () => {
     const queryClient = useQueryClient();

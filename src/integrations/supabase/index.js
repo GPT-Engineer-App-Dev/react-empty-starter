@@ -111,7 +111,11 @@ export const useAddVenue = () => {
 export const useUpdateVenue = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (updatedVenue) => fromSupabase(supabase.from('venues').update(updatedVenue).eq('id', updatedVenue.id)),
+        mutationFn: (updatedVenue) => {
+            // Exclude events information from the updatedVenue object
+            const { events, ...venueWithoutEvents } = updatedVenue;
+            return fromSupabase(supabase.from('venues').update(venueWithoutEvents).eq('id', updatedVenue.id));
+        },
         onSuccess: () => {
             queryClient.invalidateQueries('venues');
         },

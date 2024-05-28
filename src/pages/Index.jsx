@@ -1,26 +1,37 @@
-import { Container, Text, VStack, Box, Flex, Spacer, IconButton, useColorMode, useColorModeValue } from "@chakra-ui/react";
-import { FaSun, FaMoon } from "react-icons/fa";
+import { Container, Text, VStack, Box, Table, Thead, Tbody, Tr, Th, Td, Link } from "@chakra-ui/react";
+import { useEvents } from "../integrations/supabase/index.js";
+import { Link as RouterLink } from "react-router-dom";
 
 const Index = () => {
-  const { colorMode, toggleColorMode } = useColorMode();
-  const bg = useColorModeValue("gray.100", "gray.900");
-  const color = useColorModeValue("black", "white");
+  const { data: events } = useEvents();
 
   return (
-    <Box bg={bg} color={color} minH="100vh">
-      <Flex as="nav" bg={useColorModeValue("white", "gray.800")} p={4} boxShadow="md">
-        <Box fontWeight="bold">MyApp</Box>
-        <Spacer />
-        <IconButton
-          aria-label="Toggle dark mode"
-          icon={colorMode === "light" ? <FaMoon /> : <FaSun />}
-          onClick={toggleColorMode}
-        />
-      </Flex>
+    <Box minH="100vh">
       <Container centerContent maxW="container.md" py={8}>
         <VStack spacing={4}>
-          <Text fontSize="2xl">Your Blank Canvas</Text>
-          <Text>Chat with the agent to start making edits.</Text>
+          <Text fontSize="2xl">Events</Text>
+          <Table variant="simple">
+            <Thead>
+              <Tr>
+                <Th>Name</Th>
+                <Th>Date</Th>
+                <Th>Description</Th>
+              </Tr>
+            </Thead>
+            <Tbody>
+              {events?.map(event => (
+                <Tr key={event.id}>
+                  <Td>
+                    <Link as={RouterLink} to={`/event/${event.id}`}>
+                      {event.name}
+                    </Link>
+                  </Td>
+                  <Td>{event.date}</Td>
+                  <Td>{event.description}</Td>
+                </Tr>
+              ))}
+            </Tbody>
+          </Table>
         </VStack>
       </Container>
     </Box>

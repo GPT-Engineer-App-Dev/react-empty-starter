@@ -1,4 +1,4 @@
-import { Container, Text, VStack, Box, Table, Thead, Tbody, Tr, Th, Td, Link, Button, HStack, Input } from "@chakra-ui/react";
+import { Container, Text, VStack, Box, Table, Thead, Tbody, Tr, Th, Td, Link, Button, HStack, Input, Modal, ModalOverlay, ModalContent, ModalHeader, ModalFooter, ModalBody, ModalCloseButton, useDisclosure } from "@chakra-ui/react";
 import { useEvents, useUpdateEvent, useDeleteEvent } from "../integrations/supabase/index.js";
 import { Link as RouterLink } from "react-router-dom";
 import { useState } from "react";
@@ -9,10 +9,12 @@ const Index = () => {
   const deleteEvent = useDeleteEvent();
   const [editingEvent, setEditingEvent] = useState(null);
   const [formData, setFormData] = useState({ name: "", date: "", description: "" });
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   const handleEditClick = (event) => {
     setEditingEvent(event);
     setFormData({ name: event.name, date: event.date, description: event.description });
+    onOpen();
   };
 
   const handleDeleteClick = (eventId) => {
@@ -28,6 +30,7 @@ const Index = () => {
     e.preventDefault();
     updateEvent.mutate({ ...editingEvent, ...formData });
     setEditingEvent(null);
+    onClose();
   };
 
   return (
@@ -65,30 +68,41 @@ const Index = () => {
             </Tbody>
           </Table>
           {editingEvent && (
-            <Box as="form" onSubmit={handleFormSubmit} mt={4} p={4} borderWidth="1px" borderRadius="md">
-              <VStack spacing={4}>
-                <Input
-                  name="name"
-                  value={formData.name}
-                  onChange={handleFormChange}
-                  placeholder="Event Name"
-                />
-                <Input
-                  name="date"
-                  value={formData.date}
-                  onChange={handleFormChange}
-                  placeholder="Event Date"
-                />
-                <Input
-                  name="description"
-                  value={formData.description}
-                  onChange={handleFormChange}
-                  placeholder="Event Description"
-                />
-                <Button type="submit" colorScheme="blue">Save</Button>
-                <Button onClick={() => setEditingEvent(null)}>Cancel</Button>
-              </VStack>
-            </Box>
+            <Modal isOpen={isOpen} onClose={onClose}>
+              <ModalOverlay />
+              <ModalContent>
+                <ModalHeader>Edit Event</ModalHeader>
+                <ModalCloseButton />
+                <ModalBody>
+                  <VStack spacing={4}>
+                    <Input
+                      name="name"
+                      value={formData.name}
+                      onChange={handleFormChange}
+                      placeholder="Event Name"
+                    />
+                    <Input
+                      name="date"
+                      value={formData.date}
+                      onChange={handleFormChange}
+                      placeholder="Event Date"
+                    />
+                    <Input
+                      name="description"
+                      value={formData.description}
+                      onChange={handleFormChange}
+                      placeholder="Event Description"
+                    />
+                  </VStack>
+                </ModalBody>
+                <ModalFooter>
+                  <Button colorScheme="blue" mr={3} onClick={handleFormSubmit}>
+                    Save
+                  </Button>
+                  <Button onClick={onClose}>Cancel</Button>
+                </ModalFooter>
+              </ModalContent>
+            </Modal>
           )}
         </VStack>
       </Container>

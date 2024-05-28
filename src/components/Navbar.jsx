@@ -12,6 +12,10 @@ const Navbar = () => {
         <Link to="/">MyApp</Link>
       </Box>
       <Spacer />
+      <Box>
+        <Link to="/venues">Venues</Link>
+      </Box>
+      <Spacer />
       <IconButton
         aria-label="Toggle dark mode"
         icon={colorMode === "light" ? <FaMoon /> : <FaSun />}

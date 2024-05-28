@@ -89,8 +89,6 @@ export const useDeleteEvent = () => {
     });
 };
 
-
-
 export const useVenues = () => useQuery({
     queryKey: ['venues'],
     queryFn: () => fromSupabase(supabase.from('venues').select('*,events(*)')),
@@ -102,6 +100,25 @@ export const useAddVenue = () => {
         mutationFn: (newVenue) => fromSupabase(supabase.from('venues').insert([newVenue])),
         onSuccess: () => {
             queryClient.invalidateQueries('venues');
+        },
+    });
+};
+
+export const useComments = (eventId) => {
+    return useQuery({
+        queryKey: ['comments', eventId],
+        queryFn: async () => {
+            return await fromSupabase(supabase.from('comments').select('*').eq('event_id', eventId));
+        },
+    });
+};
+
+export const useAddComment = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (newComment) => fromSupabase(supabase.from('comments').insert([newComment])),
+        onSuccess: () => {
+            queryClient.invalidateQueries('comments');
         },
     });
 };

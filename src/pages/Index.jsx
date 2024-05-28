@@ -1,4 +1,4 @@
-import { Container, Text, VStack, Box, Table, Thead, Tbody, Tr, Th, Td, Link, Button, HStack, Input, Modal, ModalOverlay, ModalContent, ModalHeader, ModalFooter, ModalBody, ModalCloseButton, useDisclosure } from "@chakra-ui/react";
+import { Container, Text, VStack, Box, Table, Thead, Tbody, Tr, Th, Td, Link, Button, HStack, Input, Modal, ModalOverlay, ModalContent, ModalHeader, ModalFooter, ModalBody, ModalCloseButton, useDisclosure, Checkbox } from "@chakra-ui/react";
 import { useEvents, useUpdateEvent, useDeleteEvent } from "../integrations/supabase/index.js";
 import { Link as RouterLink } from "react-router-dom";
 import { useState } from "react";
@@ -8,12 +8,12 @@ const Index = () => {
   const updateEvent = useUpdateEvent();
   const deleteEvent = useDeleteEvent();
   const [editingEvent, setEditingEvent] = useState(null);
-  const [formData, setFormData] = useState({ name: "", date: "", description: "" });
+  const [formData, setFormData] = useState({ name: "", date: "", description: "", is_pinned: false });
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const handleEditClick = (event) => {
     setEditingEvent(event);
-    setFormData({ name: event.name, date: event.date, description: event.description });
+    setFormData({ name: event.name, date: event.date, description: event.description, is_pinned: event.is_pinned });
     onOpen();
   };
 
@@ -22,8 +22,8 @@ const Index = () => {
   };
 
   const handleFormChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prevData) => ({ ...prevData, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setFormData((prevData) => ({ ...prevData, [name]: type === "checkbox" ? checked : value }));
   };
 
   const handleFormSubmit = (e) => {
@@ -32,6 +32,8 @@ const Index = () => {
     setEditingEvent(null);
     onClose();
   };
+
+  const sortedEvents = events?.sort((a, b) => b.is_pinned - a.is_pinned);
 
   return (
     <Box minH="100vh">
@@ -44,11 +46,12 @@ const Index = () => {
                 <Th>Name</Th>
                 <Th>Date</Th>
                 <Th>Description</Th>
+                <Th>Pinned</Th>
                 <Th>Actions</Th>
               </Tr>
             </Thead>
             <Tbody>
-              {events?.map(event => (
+              {sortedEvents?.map(event => (
                 <Tr key={event.id}>
                   <Td>
                     <Link as={RouterLink} to={`/event/${event.id}`}>
@@ -57,6 +60,7 @@ const Index = () => {
                   </Td>
                   <Td>{event.date}</Td>
                   <Td>{event.description}</Td>
+                  <Td>{event.is_pinned ? "Yes" : "No"}</Td>
                   <Td>
                     <HStack spacing={2}>
                       <Button size="sm" onClick={() => handleEditClick(event)}>Edit</Button>
@@ -93,6 +97,13 @@ const Index = () => {
                       onChange={handleFormChange}
                       placeholder="Event Description"
                     />
+                    <Checkbox
+                      name="is_pinned"
+                      isChecked={formData.is_pinned}
+                      onChange={handleFormChange}
+                    >
+                      Pinned
+                    </Checkbox>
                   </VStack>
                 </ModalBody>
                 <ModalFooter>

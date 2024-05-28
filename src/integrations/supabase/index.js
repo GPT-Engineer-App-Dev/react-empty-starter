@@ -54,12 +54,7 @@ export const useEvents = () => {
     return useQuery({
         queryKey: ['events'],
         queryFn: async () => {
-            const events = await fromSupabase(supabase.from('events').select('*'));
-            const comments = await fromSupabase(supabase.from('comments').select('*'));
-            return events.map(event => ({
-                ...event,
-                comments: comments.filter(comment => comment.event_id === event.id)
-            }));
+            return await fromSupabase(supabase.from('events').select('*'));
         },
     });
 };
@@ -94,20 +89,7 @@ export const useDeleteEvent = () => {
     });
 };
 
-export const useComments = (eventId) => useQuery({
-    queryKey: ['comments', eventId],
-    queryFn: () => fromSupabase(supabase.from('comments').select('*').eq('event_id', eventId)),
-});
 
-export const useAddComment = () => {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: (newComment) => fromSupabase(supabase.from('comments').insert([newComment])),
-        onSuccess: () => {
-            queryClient.invalidateQueries('comments');
-        },
-    });
-};
 
 export const useVenues = () => useQuery({
     queryKey: ['venues'],
